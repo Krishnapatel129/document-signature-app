@@ -1,0 +1,16 @@
+$kind: http-request
+name: http://localhost:5000/api/docs/upload
+url: http://localhost:5000/api/docs/upload
+method: POST
+headers:
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMjdkNDI3MjAzMGIyZTQ5MTUyMmRkMiIsImlhdCI6MTc4MDk5NTE1MCwiZXhwIjoxNzgxNTk5OTUwfQ.7ZdD8qqe9DIxGfDT77YKYTPDCiE9KnbpfNYdmF-bL0Y
+body:
+  type: formdata
+  content:
+    - type: file
+      key: document
+      src:
+        - postman-cloud:///1f163e26-e4ec-4210-83c2-71ad15a31756
+      description: ""
+      disabled: false
+order: 1780996375212
