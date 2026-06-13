@@ -11,6 +11,7 @@ function PDFViewer({ pdfUrl, fileId }) {
   const [pageNumber, setPageNumber] = useState(1);
   const [signatures, setSignatures] = useState([]);
   const [error, setError] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
 
   useEffect(() => {
     const loadSignatures = async () => {
@@ -31,7 +32,7 @@ function PDFViewer({ pdfUrl, fileId }) {
 
   const saveSignature = async (x, y) => {
     try {
-      const response = await axios.post(`${API_BASE}/api/signatures/save`, {
+      const response = await axios.post(`${API_BASE}/api/signatures`, {
         fileId,
         signer: "John Doe",
         x,
@@ -55,6 +56,33 @@ function PDFViewer({ pdfUrl, fileId }) {
     await saveSignature(x, y);
   };
 
+  const handleDragStart = (event) => {
+    event.dataTransfer.setData("text/plain", "signature-field");
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = () => {
+    setDragActive(false);
+  };
+
+  const handleDrop = async (event) => {
+    event.preventDefault();
+    setDragActive(false);
+
+    const type = event.dataTransfer.getData("text/plain");
+    if (type !== "signature-field" || !fileId) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+
+    await saveSignature(x, y);
+  };
+
   const nextPage = () => {
     if (pageNumber < numPages) setPageNumber(pageNumber + 1);
   };
@@ -65,9 +93,39 @@ function PDFViewer({ pdfUrl, fileId }) {
 
   return (
     <div style={{ textAlign: "center" }}>
+      <div style={{ marginBottom: "12px" }}>
+        <div
+          draggable
+          onDragStart={handleDragStart}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "8px 14px",
+            borderRadius: "999px",
+            border: "2px dashed #2563eb",
+            background: "rgba(59, 130, 246, 0.08)",
+            color: "#1d4ed8",
+            cursor: "grab",
+            userSelect: "none",
+          }}
+        >
+          Drag signature field onto PDF
+        </div>
+      </div>
+
       <div
         onClick={handlePdfClick}
-        style={{ position: "relative", display: "inline-block", cursor: "crosshair" }}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        style={{
+          position: "relative",
+          display: "inline-block",
+          cursor: "crosshair",
+          border: dragActive ? "2px dashed #2563eb" : "2px solid transparent",
+          transition: "border-color 0.2s ease",
+        }}
       >
         <Document
           file={pdfUrl}

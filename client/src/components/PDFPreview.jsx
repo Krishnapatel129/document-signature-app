@@ -9,7 +9,7 @@ const handlePdfClick = async (e, fileId) => {
   console.log("Clicked:", x, y);
 
   try {
-    const response = await axios.post("http://localhost:5000/api/signatures/save", {
+    const response = await axios.post("http://localhost:5000/api/signatures", {
       fileId,
       signer: "John Doe", // you can make this dynamic later
       x,
