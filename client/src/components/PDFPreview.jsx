@@ -1,24 +1,23 @@
-import { Document, Page } from "react-pdf";
-import { useState } from "react";
+import axios from "axios";
 
-function PDFPreview({ fileUrl }) {
-  const [numPages, setNumPages] = useState(null);
+const handlePdfClick = async (e, fileId) => {
+  const rect = e.currentTarget.getBoundingClientRect();
 
-  return (
-    <div>
-      <Document
-        file={fileUrl}
-        onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-        onLoadError={(error) => {
-          console.error("PDF ERROR:", error);
-        }}
-      >
-        <Page pageNumber={1} width={600} />
-      </Document>
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
 
-      <p>Total Pages: {numPages}</p>
-    </div>
-  );
-}
+  console.log("Clicked:", x, y);
 
-export default PDFPreview;
+  try {
+    const response = await axios.post("http://localhost:5000/api/signatures/save", {
+      fileId,
+      signer: "John Doe", // you can make this dynamic later
+      x,
+      y,
+    });
+
+    console.log("Signature saved:", response.data);
+  } catch (error) {
+    console.error("Signature Save Error:", error.response?.data || error.message);
+  }
+};

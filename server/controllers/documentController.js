@@ -1,41 +1,32 @@
-const Document = require("../models/Document");
+// controllers/documentController.js
+import Document from "../models/Document.js"; // adjust path if needed
 
-exports.uploadDocument = async (req, res) => {
+// Upload document
+export const uploadDocument = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({
-        message: "No file uploaded",
-      });
+      return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const document = await Document.create({
-      fileName: req.file.originalname,
-      filePath: req.file.path,
-      fileSize: req.file.size,
-      status: "Pending",
+    const newDoc = new Document({
+      filename: req.file.originalname,
+      path: req.file.path,
+      mimetype: req.file.mimetype,
     });
 
-    res.status(201).json({
-      message: "Document uploaded successfully",
-      document,
-    });
+    await newDoc.save();
+    res.status(201).json({ message: "Document uploaded successfully", document: newDoc });
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 };
 
-exports.getDocuments = async (req, res) => {
+// Get all documents
+export const getDocuments = async (req, res) => {
   try {
-    const documents = await Document.find().sort({
-      createdAt: -1,
-    });
-
-    res.status(200).json(documents);
+    const documents = await Document.find();
+    res.json(documents);
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 };

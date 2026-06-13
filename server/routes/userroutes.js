@@ -1,5 +1,5 @@
-const express = require("express");
-const protect = require("../middleware/authMiddleware");
+import express from "express";
+import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -10,4 +10,4 @@ router.get("/profile", protect, (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

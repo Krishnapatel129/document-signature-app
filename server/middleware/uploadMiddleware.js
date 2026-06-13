@@ -1,6 +1,8 @@
-const multer = require("multer");
-const path = require("path");
+// middleware/uploadMiddleware.js
+import multer from "multer";
+import path from "path";
 
+// Configure storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");
@@ -10,22 +12,16 @@ const storage = multer.diskStorage({
   },
 });
 
+// File filter (optional)
 const fileFilter = (req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-
-  console.log("FILE NAME:", file.originalname);
-  console.log("MIME TYPE:", file.mimetype);
-
-  if (ext === ".pdf") {
+  if (file.mimetype === "application/pdf") {
     cb(null, true);
   } else {
     cb(new Error("Only PDF files are allowed"), false);
   }
 };
 
-const upload = multer({
-  storage,
-  fileFilter,
-});
+// Create upload middleware
+const upload = multer({ storage, fileFilter });
 
-module.exports = upload;
+export default upload;
