@@ -11,6 +11,8 @@ import userRoutes from "./routes/userRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import signatureRoutes from "./routes/signatureRoutes.js";
 import Signature from "./models/Signature.js";
+import fileRoutes from "./routes/fileRoutes.js";
+
 
 // DNS setup
 dns.setDefaultResultOrder("ipv4first");
@@ -30,6 +32,8 @@ const __dirname = path.dirname(__filename);
 // ✅ Create Express app
 const app = express();
 
+
+app.use("/api/files", fileRoutes);
 // ✅ Middleware
 app.use(cors({
   origin: "http://localhost:5173",
