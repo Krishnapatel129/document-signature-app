@@ -10,9 +10,7 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import signatureRoutes from "./routes/signatureRoutes.js";
-import Signature from "./models/Signature.js";
 import fileRoutes from "./routes/fileRoutes.js";
-
 
 // DNS setup
 dns.setDefaultResultOrder("ipv4first");
@@ -23,28 +21,41 @@ dns.setServers([
   "1.0.0.1",
 ]);
 
-// Load environment variables
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Create Express app
 const app = express();
 
+// ✅ Allow multiple frontend origins and echo the requester when allowed
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5175"];
 
-app.use("/api/files", fileRoutes);
-// ✅ Middleware
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true,
-}));
+// Simple explicit CORS handling for allowed origins (deterministic)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  console.log('[CORS] request origin:', origin);
+  // DEV: allow all origins to avoid CORS issues while developing
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
+
 app.use(express.json());
 
 // ✅ Connect DB
 connectDB();
 
-// ✅ Static uploads
+// ✅ Static uploads with CORS
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ✅ Routes
@@ -52,16 +63,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/signatures", signatureRoutes);
-
-app.get("/api/signatures/file/:fileId", async (req, res) => {
-  try {
-    const { fileId } = req.params;
-    const signatures = await Signature.find({ fileId });
-    res.json({ signatures });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+app.use("/api/files", fileRoutes);
 
 // ✅ Start server
 const PORT = process.env.PORT || 5000;

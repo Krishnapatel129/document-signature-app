@@ -90,7 +90,25 @@ function PDFViewer({ pdfUrl, fileId }) {
   const prevPage = () => {
     if (pageNumber > 1) setPageNumber(pageNumber - 1);
   };
+  const handleFinalize = async () => {
+  try {
+    const res = await axios.post(
+      `http://localhost:5000/api/signatures/finalize/${fileId}`
+    );
 
+    alert("Signed PDF generated!");
+
+    window.open(
+      `http://localhost:5000${res.data.signedPdf}`,
+      "_blank"
+    );
+
+  } catch (err) {
+    console.error(err);
+
+    alert("Failed to generate PDF");
+  }
+};
   return (
     <div style={{ textAlign: "center" }}>
       <div style={{ marginBottom: "12px" }}>
@@ -185,7 +203,11 @@ function PDFViewer({ pdfUrl, fileId }) {
       )}
 
       {error && <p style={{ color: "red" }}>{error}</p>}
+      <button onClick={handleFinalize}>
+  Finalize PDF
+</button>
     </div>
+    
   );
 }
 

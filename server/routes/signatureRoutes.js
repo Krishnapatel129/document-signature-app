@@ -1,5 +1,6 @@
 import express from "express";
 import Signature from "../models/Signature.js";
+import { generateSignedPDF } from "../controllers/signController.js";
 
 const router = express.Router();
 
@@ -29,6 +30,8 @@ const saveSignatureHandler = async (req, res) => {
 
 router.post("/", saveSignatureHandler);
 router.post("/save", saveSignatureHandler);
+
+router.post("/finalize/:fileId", generateSignedPDF);
 
 router.get("/file/:fileId", async (req, res) => {
   try {
