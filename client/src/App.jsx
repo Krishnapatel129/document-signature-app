@@ -1,10 +1,20 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Dashboard from "./pages/Dashboard";
+import PublicSignPage from "./pages/PublicSignPage";
 
 function App() {
   return (
-    <div>
-      <Dashboard />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+
+        <Route
+          path="/sign/:token"
+          element={<PublicSignPage />}
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

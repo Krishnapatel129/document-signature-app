@@ -1,19 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
-import PDFViewer from "../components/PDFViewer";
 
-function Dashboard() {
-  const [selectedFile, setSelectedFile] = useState(null);
+function DocumentList() {
+  const [files, setFiles] = useState([]);
 
-  const documents = [
-    {
-      _id: "6a290cf5863cf79101a69c34",
-      originalName: "sample.pdf",
-      filename: "1781075189460.pdf",
-    },
-  ];
-
-  // Day 9: Send signature request
   const sendRequest = async (fileId) => {
     try {
       const signerEmail = prompt("Enter signer email:");
@@ -31,36 +21,37 @@ function Dashboard() {
       alert("Invitation sent successfully");
     } catch (error) {
       console.error(error);
-
-      alert(
-        error.response?.data?.message ||
-        "Failed to send invitation"
-      );
+      alert("Failed to send invitation");
     }
   };
 
   return (
-    <>
+    <div>
       <h2>My Documents</h2>
 
-      {documents.map((file) => (
+      {files.map((file) => (
         <div
           key={file._id}
           style={{
-            marginBottom: "20px",
             border: "1px solid #ccc",
             padding: "10px",
+            marginBottom: "10px",
           }}
         >
           <h3>{file.originalName}</h3>
 
+          <p>Status: {file.status || "Pending"}</p>
+
+          {/* Existing Preview Button */}
           <button
-            onClick={() => setSelectedFile(file)}
+            onClick={() => {
+              // your preview logic here
+            }}
           >
             Preview
           </button>
 
-          {/* Day 9 Button */}
+          {/* Add this button */}
           <button
             onClick={() => sendRequest(file._id)}
             style={{ marginLeft: "10px" }}
@@ -69,15 +60,8 @@ function Dashboard() {
           </button>
         </div>
       ))}
-
-      {selectedFile && (
-        <PDFViewer
-          pdfUrl={`http://localhost:5000/uploads/${selectedFile.filename}`}
-          fileId={selectedFile._id}
-        />
-      )}
-    </>
+    </div>
   );
 }
 
-export default Dashboard;
+export default DocumentList;

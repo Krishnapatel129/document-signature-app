@@ -1,3 +1,4 @@
+import "./config/env.js";
 import dns from "dns";
 import dotenv from "dotenv";
 import express from "express";
@@ -11,7 +12,8 @@ import userRoutes from "./routes/userRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import signatureRoutes from "./routes/signatureRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
-
+import signatureRequestRoutes
+from "./routes/signatureRequestRoutes.js";
 
 // DNS setup
 dns.setDefaultResultOrder("ipv4first");
@@ -69,6 +71,10 @@ app.use("/api/signatures", signatureRoutes);
 app.use(
   "/signed",
   express.static(path.join(__dirname, "signed"))
+);
+app.use(
+  "/api/signature-requests",
+  signatureRequestRoutes
 );
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
