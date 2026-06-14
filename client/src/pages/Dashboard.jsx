@@ -1,13 +1,13 @@
 import { useState } from "react";
 import PDFViewer from "../components/PDFViewer";
 
+
 function Dashboard() {
   const [selectedFile, setSelectedFile] = useState(null);
 
-  // Temporary sample document
   const documents = [
     {
-      _id: "648000000000000000000000",
+      _id: "6a290cf5863cf79101a69c34",
       originalName: "sample.pdf",
       filename: "1781075189460.pdf",
     },
@@ -31,8 +31,10 @@ function Dashboard() {
           fileId={selectedFile._id}
         />
       )}
+
     </>
   );
 }
 
 export default Dashboard;
+

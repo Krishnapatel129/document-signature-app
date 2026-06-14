@@ -1,21 +1,29 @@
-// models/Document.js
 import mongoose from "mongoose";
 
-const documentSchema = new mongoose.Schema({
-  filename: {
-    type: String,
-    required: true,
+const documentSchema = new mongoose.Schema(
+  {
+    fileName: {
+      type: String,
+      required: true,
+    },
+    filePath: {
+      type: String,
+      required: true,
+    },
+    fileSize: {
+      type: Number,
+    },
+    status: {
+      type: String,
+      default: "Pending",
+    },
   },
-  path: {
-    type: String,
-    required: true,
-  },
-  mimetype: {
-    type: String,
-    required: true,
-  },
-}, { timestamps: true });
+  {
+    timestamps: true,
+  }
+);
 
-const Document = mongoose.model("Document", documentSchema);
-
-export default Document;
+export default mongoose.model(
+  "Document",
+  documentSchema
+);

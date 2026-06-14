@@ -12,6 +12,7 @@ import documentRoutes from "./routes/documentRoutes.js";
 import signatureRoutes from "./routes/signatureRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 
+
 // DNS setup
 dns.setDefaultResultOrder("ipv4first");
 dns.setServers([
@@ -57,14 +58,18 @@ connectDB();
 
 // ✅ Static uploads with CORS
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/signed", express.static(path.join(__dirname, "signed")));
 
 // ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/signatures", signatureRoutes);
-app.use("/api/files", fileRoutes);
 
+app.use(
+  "/signed",
+  express.static(path.join(__dirname, "signed"))
+);
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
