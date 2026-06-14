@@ -14,6 +14,7 @@ import signatureRoutes from "./routes/signatureRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import signatureRequestRoutes
 from "./routes/signatureRequestRoutes.js";
+import auditRoutes from "./routes/auditRoutes.js";
 
 // DNS setup
 dns.setDefaultResultOrder("ipv4first");
@@ -75,6 +76,10 @@ app.use(
 app.use(
   "/api/signature-requests",
   signatureRequestRoutes
+);
+app.use(
+  "/api/audit",
+  auditRoutes
 );
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
