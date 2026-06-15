@@ -15,6 +15,8 @@ function PDFPreview({ pdfUrl, fileId, signer = "K. H. Patel" }) {
   const [pageNumber, setPageNumber] = useState(1);
   const [signatures, setSignatures] = useState([]);
   const [error, setError] = useState(null);
+  const [reason, setReason] = useState("");
+  const [selectedSignature, setSelectedSignature] = useState(null);
 
   const pageSignatures = useMemo(
     () =>
@@ -118,6 +120,58 @@ function PDFPreview({ pdfUrl, fileId, signer = "K. H. Patel" }) {
     }
   };
 
+
+const handleSign = async () => {
+  if (!selectedSignature) {
+    alert("Select a signature first");
+    return;
+  }
+
+  try {
+    await axios.put(
+      `${API_BASE}/api/signatures/${selectedSignature._id}/sign`,
+      {
+        signatureText: signer,
+      }
+    );
+
+    alert("Document signed");
+
+    loadSignatures();
+    setSelectedSignature(null);
+  } catch (err) {
+    alert(
+      err.response?.data?.message || err.message
+    );
+  }
+};
+
+const handleReject = async () => {
+  if (!selectedSignature) {
+    alert("Select a signature first");
+    return;
+  }
+
+  try {
+    await axios.put(
+      `${API_BASE}/api/signatures/${selectedSignature._id}/reject`,
+      {
+        reason,
+      }
+    );
+
+    alert("Document rejected");
+
+    loadSignatures();
+
+    setSelectedSignature(null);
+    setReason("");
+  } catch (err) {
+    alert(
+      err.response?.data?.message || err.message
+    );
+  }
+};
   return (
     <div style={{ textAlign: "center" }}>
       <div style={{ marginBottom: 12 }}>
@@ -164,8 +218,9 @@ function PDFPreview({ pdfUrl, fileId, signer = "K. H. Patel" }) {
         </Document>
 
         {pageSignatures.map((signature) => (
-          <div
-            key={signature._id}
+  <div
+    key={signature._id}
+    onClick={() => setSelectedSignature(signature)}
             style={{
               position: "absolute",
               left: `${signature.coordinates.x * 100}%`,
@@ -175,10 +230,12 @@ function PDFPreview({ pdfUrl, fileId, signer = "K. H. Patel" }) {
               height: 28,
               borderRadius: "50%",
               border: "2px solid #2563eb",
-              background:
-                signature.status === "signed"
-                  ? "#10b981"
-                  : "rgba(59,130,246,0.2)",
+             background:
+  signature.status === "Signed"
+    ? "#10b981"
+    : signature.status === "Rejected"
+    ? "#ef4444"
+    : "rgba(59,130,246,0.2)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -187,7 +244,13 @@ function PDFPreview({ pdfUrl, fileId, signer = "K. H. Patel" }) {
             }}
             title={`${signature.signer} - ${signature.status}`}
           >
-            {signature.status === "signed" ? "S" : "P"}
+           {
+  signature.status === "Signed"
+    ? "S"
+    : signature.status === "Rejected"
+    ? "R"
+    : "P"
+}
           </div>
         ))}
       </div>
@@ -207,15 +270,43 @@ function PDFPreview({ pdfUrl, fileId, signer = "K. H. Patel" }) {
       )}
 
       {error && <p style={{ color: "red" }}>{error}</p>}
+      {selectedSignature && (
+  <div style={{ marginTop: 20 }}>
+    <p>
+      Selected: {selectedSignature.signer}
+    </p>
 
+    <button onClick={handleSign}>
+      Accept & Sign
+    </button>
+
+    <br /><br />
+
+    <textarea
+      placeholder="Reason for rejection"
+      value={reason}
+      onChange={(e) => setReason(e.target.value)}
+      rows={3}
+      cols={30}
+    />
+
+    <br /><br />
+
+    <button onClick={handleReject}>
+      Reject
+    </button>
+  </div>
+)}
       <div style={{ marginTop: 20 }}>
         <button onClick={handleFinalize} disabled={!fileId}>
           Finalize PDF
         </button>
       </div>
     </div>
+    
   );
 }
+
 
 export default PDFPreview;
 

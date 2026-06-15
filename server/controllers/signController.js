@@ -13,21 +13,25 @@ POST /api/signatures
 */
 export const createSignature = async (req, res) => {
   try {
-    const { fileId, signer, x, y, pageNumber } = req.body;
+    console.log("BODY RECEIVED:", req.body);
 
-    if (typeof pageNumber !== "number") {
-      return res.status(400).json({ message: "pageNumber is required" });
-    }
+    const {
+      fileId,
+      signer,
+      x,
+      y,
+      pageNumber,
+    } = req.body;
 
     const signature = await Signature.create({
       fileId,
       signer,
-      pageNumber,
       coordinates: {
         x,
         y,
       },
-      status: "pending",
+      pageNumber,
+      status: "Pending",
     });
 
     return res.status(201).json({
@@ -36,7 +40,8 @@ export const createSignature = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Create Signature Error:", error);
+    console.error("CREATE SIGNATURE ERROR:");
+    console.error(error);
 
     return res.status(500).json({
       message: error.message,
@@ -44,6 +49,72 @@ export const createSignature = async (req, res) => {
   }
 };
 
+    
+export const signDocument = async (req, res) => {
+  try {
+    const { signatureText } = req.body;
+
+    const signature = await Signature.findById(req.params.id);
+
+    if (!signature) {
+      return res.status(404).json({
+        message: "Signature request not found",
+      });
+    }
+    
+    // Prevent duplicate actions
+    if (signature.status !== "Pending") {
+      return res.status(400).json({
+        message: `Document already ${signature.status}`,
+      });
+    }
+
+    signature.signatureText = signatureText;
+    signature.status = "Signed";
+    signature.actedAt = new Date();
+
+    await signature.save();
+
+    res.json({
+      message: "Document signed successfully",
+      signature,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+export const rejectDocument = async (req, res) => {
+  try {
+    const { reason } = req.body;
+
+    const signature = await Signature.findById(req.params.id);
+
+    if (!signature) {
+      return res.status(404).json({
+        message: "Signature request not found",
+      });
+    }
+
+    signature.status = "Rejected";
+
+    signature.rejectionReason = reason;
+
+    signature.actedAt = new Date();
+
+    await signature.save();
+
+    res.json({
+      message: "Document rejected",
+      signature,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 /*
 =====================================
 GET SIGNATURES BY FILE
@@ -131,31 +202,65 @@ export const generateSignedPDF = async (req, res) => {
       };
     };
 
-    signatures.forEach((sig) => {
-      const pageIndex = (sig.pageNumber || 1) - 1; // 0-based for pdf-lib
-      const page = pdfDoc.getPages()[pageIndex];
+signatures.forEach((sig) => {
+  // Skip rejected signatures
+  if (sig.status === "Rejected") {
+    console.log("Skipping rejected signature:", sig._id);
+    return;
+  }
 
-      if (!page) {
-        throw new Error(`Invalid pageNumber: ${sig.pageNumber}`);
-      }
+  // Skip old/invalid signatures
+  if (
+    !sig.coordinates ||
+    sig.coordinates.x === undefined ||
+    sig.coordinates.y === undefined
+  ) {
+    console.log("Skipping invalid signature:", sig._id, sig);
+    return;
+  }
 
-      const { width: pageWidth, height: pageHeight } =
-        pageDimensions(page);
+  const pageIndex = (sig.pageNumber || 1) - 1;
+  const page = pdfDoc.getPages()[pageIndex];
 
-      const x = sig.coordinates.x * pageWidth;
+  if (!page) {
+    console.log("Skipping invalid page:", sig._id, { pageIndex });
+    return;
+  }
 
-      const y =
-        pageHeight - sig.coordinates.y * pageHeight;
+  const { width: pageWidth, height: pageHeight } =
+    pageDimensions(page);
 
-      page.drawText(sig.signer, {
-        x,
-        y,
-        size: 18,
-        font,
-        color: rgb(0, 0, 0),
-      });
-    });
+  const x = sig.coordinates.x * pageWidth;
+  const y = pageHeight - sig.coordinates.y * pageHeight;
 
+  console.log("Drawing signature", {
+    sigId: sig._id?.toString?.(),
+    signer: sig.signer,
+    pageIndex,
+    x,
+    y,
+    coordinates: sig.coordinates,
+    pageNumber: sig.pageNumber,
+  });
+
+  const signatureText = (sig.signatureText ?? "").toString().trim();
+  const signerText = (sig.signer ?? "").toString().trim();
+
+  // Prefer the accepted/typed signature text.
+  // Avoid drawing fallback/default values like "Signed".
+  const textToDraw =
+    signatureText && signatureText.toLowerCase() !== "signed"
+      ? signatureText
+      : signerText || "Signed";
+
+  page.drawText(textToDraw, {
+    x,
+    y,
+    size: 18,
+    font,
+    color: rgb(0, 0, 0),
+  });
+});
     const signedPdfBytes = await pdfDoc.save();
 
     const signedDir = path.join(

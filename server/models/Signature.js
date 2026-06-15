@@ -1,22 +1,43 @@
 import mongoose from "mongoose";
 
-const signatureSchema = new mongoose.Schema({
-  fileId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Document",
-    required: true,
+const signatureSchema = new mongoose.Schema(
+  {
+    fileId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "File",
+      required: true,
+    },
+
+    // Coordinates are saved by PDFViewer drag/drop + consumed by generateSignedPDF
+    coordinates: {
+      x: { type: Number },
+      y: { type: Number },
+    },
+
+    // 1-based page number (matches controller/UI)
+    pageNumber: { type: Number },
+
+    signer: { type: String, default: "" },
+    signatureText: String,
+
+
+    status: {
+      type: String,
+      enum: ["Pending", "Signed", "Rejected"],
+      default: "Pending",
+    },
+
+    rejectionReason: {
+      type: String,
+      default: "",
+    },
+
+    actedAt: Date,
   },
-  coordinates: {
-    x: { type: Number, required: true },
-    y: { type: Number, required: true },
-  },
-  signer: { type: String, required: true },
-  pageNumber: { type: Number, required: true },
-  status: {
-    type: String,
-    enum: ["pending", "signed"],
-    default: "pending",
-  },
-}, { timestamps: true });
+  {
+    timestamps: true,
+  }
+);
 
 export default mongoose.model("Signature", signatureSchema);
+

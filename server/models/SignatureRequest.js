@@ -21,8 +21,13 @@ const signatureRequestSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "signed"],
+      enum: ["pending", "signed", "rejected"],
       default: "pending",
+    },
+
+    rejectionReason: {
+      type: String,
+      default: "",
     },
   },
   {

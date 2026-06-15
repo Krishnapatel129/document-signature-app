@@ -7,8 +7,9 @@ import { useEffect, useState } from "react";
 const API_BASE =
   import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-function PDFViewer({ pdfUrl, fileId }) {
+function PDFViewer({ pdfUrl, fileId, isReadOnly }) {
   const [numPages, setNumPages] = useState(null);
+
   const [pageNumber, setPageNumber] = useState(1);
   const [signatures, setSignatures] = useState([]);
   const [error, setError] = useState(null);
@@ -46,6 +47,9 @@ function PDFViewer({ pdfUrl, fileId }) {
       {
         fileId,
         signer: "K. H. Patel",
+        // Keep typed signature value in `signatureText` too.
+        // Since this public page doesn't have an explicit input,
+        // we reuse the same value for now.
         x,
         y,
         pageNumber,
@@ -149,8 +153,9 @@ function PDFViewer({ pdfUrl, fileId }) {
     <div style={{ textAlign: "center" }}>
       <div style={{ marginBottom: 12 }}>
         <div
-          draggable
-          onDragStart={handleDragStart}
+          draggable={!isReadOnly}
+          onDragStart={isReadOnly ? undefined : handleDragStart}
+
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -170,9 +175,10 @@ function PDFViewer({ pdfUrl, fileId }) {
       </div>
 
       <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
+        onDragOver={isReadOnly ? undefined : handleDragOver}
+        onDragLeave={isReadOnly ? undefined : handleDragLeave}
+        onDrop={isReadOnly ? undefined : handleDrop}
+
         style={{
           position: "relative",
           display: "inline-block",
@@ -199,44 +205,25 @@ function PDFViewer({ pdfUrl, fileId }) {
           />
         </Document>
 
-        {pageSignatures.map((signature) => (
-          <div
-            key={signature._id}
-            style={{
-              position: "absolute",
-              left: `${
-                signature.coordinates.x *
-                100
-              }%`,
-              top: `${
-                signature.coordinates.y *
-                100
-              }%`,
-              transform:
-                "translate(-50%, -50%)",
-              width: 28,
-              height: 28,
-              borderRadius: "50%",
-              border:
-                "2px solid #2563eb",
-              background:
-                signature.status ===
-                "signed"
-                  ? "#10b981"
-                  : "rgba(59,130,246,0.2)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: "bold",
-              pointerEvents: "none",
-            }}
-            title={`${signature.signer} - ${signature.status}`}
-          >
-            {signature.status === "signed"
-              ? "S"
-              : "P"}
-          </div>
-        ))}
+        {signatures
+  .filter(
+    (sig) =>
+      sig.coordinates &&
+      sig.coordinates.x !== undefined &&
+      sig.coordinates.y !== undefined
+  )
+  .map((sig) => (
+    <div
+      key={sig._id}
+      style={{
+        position: "absolute",
+        left: `${sig.coordinates.x * 100}%`,
+        top: `${sig.coordinates.y * 100}%`,
+      }}
+    >
+      {sig.signer}
+    </div>
+  ))}
       </div>
 
       {numPages && (
