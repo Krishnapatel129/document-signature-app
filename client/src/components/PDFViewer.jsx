@@ -206,24 +206,24 @@ function PDFViewer({ pdfUrl, fileId, isReadOnly }) {
         </Document>
 
         {signatures
-  .filter(
-    (sig) =>
-      sig.coordinates &&
-      sig.coordinates.x !== undefined &&
-      sig.coordinates.y !== undefined
-  )
-  .map((sig) => (
-    <div
-      key={sig._id}
-      style={{
-        position: "absolute",
-        left: `${sig.coordinates.x * 100}%`,
-        top: `${sig.coordinates.y * 100}%`,
-      }}
-    >
-      {sig.signer}
-    </div>
-  ))}
+          .filter(
+            (sig) =>
+              sig.coordinates &&
+              sig.coordinates.x !== undefined &&
+              sig.coordinates.y !== undefined
+          )
+          .map((sig, idx) => (
+            <div
+              key={sig._id || idx}
+              style={{
+                position: "absolute",
+                left: `${sig.coordinates.x * 100}%`,
+                top: `${sig.coordinates.y * 100}%`,
+              }}
+            >
+              {sig.signer}
+            </div>
+          ))}
       </div>
 
       {numPages && (

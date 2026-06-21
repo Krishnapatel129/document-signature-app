@@ -1,83 +1,64 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import PDFViewer from "../components/PDFViewer";
 
-function Dashboard() {
-  const [selectedFile, setSelectedFile] = useState(null);
+import StatusFilter from "../components/StatusFilter";
+import DocumentCard from "../components/DocumentCard";
+import EmptyState from "../components/EmptyState";
 
-  const documents = [
-    {
-      _id: "6a290cf5863cf79101a69c34",
-      originalName: "sample.pdf",
-      filename: "1781075189460.pdf",
-    },
-  ];
+const API_BASE = "http://localhost:5000";
 
-  // Day 9: Send signature request
-  const sendRequest = async (fileId) => {
+export default function Dashboard() {
+  const [documents, setDocuments] = useState([]);
+  const [filter, setFilter] = useState("all");
+
+  const fetchDocuments = async () => {
     try {
-      const signerEmail = prompt("Enter signer email:");
+      const res = await axios.get(`${API_BASE}/api/dashboard/documents`);
 
-      if (!signerEmail) return;
+      // Expected: { documents: [...] }
+      const rawFiles = Array.isArray(res.data?.documents)
+        ? res.data.documents
+        : [];
 
-      await axios.post(
-        "http://localhost:5000/api/signature-requests",
-        {
-          fileId,
-          signerEmail,
-        }
-      );
-
-      alert("Invitation sent successfully");
-    } catch (error) {
-      console.error(error);
-
-      alert(
-        error.response?.data?.message ||
-        "Failed to send invitation"
-      );
+      setDocuments(rawFiles);
+    } catch (err) {
+      console.error("Fetch Documents Error:", err);
+      setDocuments([]);
     }
   };
 
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
+
+  const filteredDocuments = useMemo(() => {
+    if (filter === "all") return documents;
+
+    return documents.filter(
+      (doc) => doc.status?.toLowerCase() === filter.toLowerCase()
+    );
+  }, [documents, filter]);
+
   return (
-    <>
-      <h2>My Documents</h2>
+    <div className="min-h-screen bg-gray-100">
+      <div className="max-w-7xl mx-auto px-4 py-8">
 
-      {documents.map((file) => (
-        <div
-          key={file._id}
-          style={{
-            marginBottom: "20px",
-            border: "1px solid #ccc",
-            padding: "10px",
-          }}
-        >
-          <h3>{file.originalName}</h3>
 
-          <button
-            onClick={() => setSelectedFile(file)}
-          >
-            Preview
-          </button>
-
-          {/* Day 9 Button */}
-          <button
-            onClick={() => sendRequest(file._id)}
-            style={{ marginLeft: "10px" }}
-          >
-            Request Signature
-          </button>
+        <div className="mb-6">
+          <StatusFilter value={filter} onChange={setFilter} />
         </div>
-      ))}
 
-      {selectedFile && (
-        <PDFViewer
-          pdfUrl={`http://localhost:5000/uploads/${selectedFile.filename}`}
-          fileId={selectedFile._id}
-        />
-      )}
-    </>
+        {filteredDocuments.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredDocuments.map((file) => (
+              <DocumentCard key={file._id} document={file} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
-export default Dashboard;

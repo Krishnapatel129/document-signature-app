@@ -1,29 +1,24 @@
+// models/Document.js
+
 import mongoose from "mongoose";
 
-const documentSchema = new mongoose.Schema(
-  {
-    fileName: {
-      type: String,
-      required: true,
-    },
-    filePath: {
-      type: String,
-      required: true,
-    },
-    fileSize: {
-      type: Number,
-    },
-    status: {
-      type: String,
-      default: "Pending",
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+const documentSchema = new mongoose.Schema({
+  fileName: String,
+  filePath: String,
+  fileSize: Number,
 
-export default mongoose.model(
-  "Document",
-  documentSchema
-);
+  status: {
+    type: String,
+    enum: ["Pending", "Signed", "Rejected"],
+    default: "Pending",
+  },
+
+  rejectionReason: {
+    type: String,
+    default: "",
+  },
+
+  signedAt: Date,
+});
+
+export default mongoose.model("Document", documentSchema);

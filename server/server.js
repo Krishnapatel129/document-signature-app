@@ -14,7 +14,9 @@ import signatureRoutes from "./routes/signatureRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import signatureRequestRoutes
 from "./routes/signatureRequestRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 import auditRoutes from "./routes/auditRoutes.js";
+
 
 // DNS setup
 dns.setDefaultResultOrder("ipv4first");
@@ -32,27 +34,26 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// ✅ Allow multiple frontend origins and echo the requester when allowed
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5175"];
-
 // Simple explicit CORS handling for allowed origins (deterministic)
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  console.log('[CORS] request origin:', origin);
-  // DEV: allow all origins to avoid CORS issues while developing
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
+const allowedOrigins = [
+  "http://localhost:5173",
+];
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
 
-  next();
-});
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow REST tools like Postman (no origin)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.log("[CORS BLOCKED]:", origin);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+}));
 
 app.use(express.json());
 
@@ -68,6 +69,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/signatures", signatureRoutes);
+app.use("/api/files", fileRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.use(
   "/signed",
