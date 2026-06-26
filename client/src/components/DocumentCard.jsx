@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 export default function DocumentCard({
   document,
+  onDelete,
 }) {
   const getBadgeColor = () => {
     switch (
@@ -51,13 +52,21 @@ export default function DocumentCard({
         {document.createdAt ? new Date(document.createdAt).toLocaleDateString() : "N/A"}
       </p>
 
-      <Link
-        to={`/viewer/${document._id}`}
-        className="mt-5 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-      >
-        Open Document
-      </Link>
+      <div className="flex gap-3 mt-5">
+  <Link
+    to={`/viewer/${document._id}`}
+    className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+  >
+    Open Document
+  </Link>
 
+  <button
+    onClick={() => onDelete(document._id)}
+    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+  >
+    Delete
+  </button>
+</div>
     </div>
   );
 }

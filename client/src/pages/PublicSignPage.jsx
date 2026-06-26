@@ -3,15 +3,17 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import PDFViewer from "../components/PDFViewer";
 
+
 function PublicSignPage() {
   const { token } = useParams();
 
   const [request, setRequest] = useState(null);
+  const [document, setDocument] = useState(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [decisionError, setDecisionError] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
-
+  const [signatureText, setSignatureText] = useState("");
 
   useEffect(() => {
     fetchRequest();
@@ -24,6 +26,12 @@ function PublicSignPage() {
       );
 
       setRequest(res.data);
+
+      const docRes = await axios.get(
+        `http://localhost:5000/api/documents/${res.data.fileId}`
+      );
+
+      setDocument(docRes.data);
     } catch (error) {
       console.error(error);
       alert("Invalid or expired signature link");
@@ -32,41 +40,40 @@ function PublicSignPage() {
     }
   };
 
-  if (loading) {
-    return <h2>Loading...</h2>;
-  }
-
-  if (!request) {
-    return <h2>Signature request not found.</h2>;
-  }
-
   const acceptRequest = async () => {
-    setActionLoading(true);
-    setDecisionError(null);
-    try {
-      const res = await axios.put(
-        `http://localhost:5000/api/signature-requests/${token}/accept`
-      );
-      setRequest(res.data.request);
-      alert("Request accepted");
-    } catch (err) {
-      setDecisionError(
-        err.response?.data?.message || err.message
-      );
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  setActionLoading(true);
+  setDecisionError(null);
+
+  try {
+    await axios.post(
+      `http://localhost:5000/api/signatures/finalize/${request.fileId}`
+    );
+
+    const res = await axios.put(
+      `http://localhost:5000/api/signature-requests/${token}/accept`
+    );
+
+    setRequest(res.data.request);
+    alert("Document signed successfully");
+  } catch (err) {
+    setDecisionError(err.response?.data?.message || err.message);
+  } finally {
+    setActionLoading(false);
+  }
+};
 
   const rejectRequest = async () => {
     setActionLoading(true);
     setDecisionError(null);
+
     try {
-      const reasonToSend = (rejectReason || "").trim();
+      const reasonToSend = rejectReason.trim();
+
       const res = await axios.put(
         `http://localhost:5000/api/signature-requests/${token}/reject`,
         { reason: reasonToSend }
       );
+
       setRequest(res.data.request);
       alert("Request rejected");
     } catch (err) {
@@ -78,72 +85,102 @@ function PublicSignPage() {
     }
   };
 
+  if (loading) {
+    return <h2>Loading...</h2>;
+  }
+
+  if (!request) {
+    return <h2>Signature request not found.</h2>;
+  }
+
   const isDecisionMade = request.status !== "pending";
 
   return (
-    <div>
-      <h2>Public Signature Page</h2>
+  <div className="min-h-screen bg-gray-100 py-8">
+    <div className="max-w-7xl mx-auto px-4">
 
-      <p>Signer: {request.signerEmail}</p>
+      <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">
+          Public Signature Page
+        </h2>
 
-      {request.status && (
-        <p>Status: {request.status}</p>
-      )}
+        <div className="space-y-2 text-gray-700">
+          <p>
+            <span className="font-semibold">Signer:</span>{" "}
+            {request.signerEmail}
+          </p>
 
-      {request.rejectionReason && (
-        <p style={{ color: "#b91c1c" }}>
-          Rejection reason: {request.rejectionReason}
-        </p>
-      )}
+          <p>
+            <span className="font-semibold">Status:</span>{" "}
+            <span className="ml-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm font-medium">
+              {request.status}
+            </span>
+          </p>
 
-      <div style={{ margin: "16px 0" }}>
-        <button
-          onClick={acceptRequest}
-          disabled={actionLoading || isDecisionMade}
-        >
-          {actionLoading ? "Processing..." : "Accept (Sign)"}
-        </button>
+          {request.rejectionReason && (
+            <p className="text-red-600 font-medium">
+              Rejection reason: {request.rejectionReason}
+            </p>
+          )}
+        </div>
 
-        <span style={{ margin: "0 10px" }} />
+        <div className="flex gap-4 mt-6">
+          <button
+            onClick={acceptRequest}
+            disabled={actionLoading || isDecisionMade}
+            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition"
+          >
+            {actionLoading ? "Processing..." : "Accept (Sign)"}
+          </button>
 
-        <button
-          onClick={() => {
-            rejectRequest();
-          }}
+          <button
+            onClick={rejectRequest}
+            disabled={actionLoading || isDecisionMade}
+            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition"
+          >
+            Reject
+          </button>
+        </div>
 
-          disabled={actionLoading || isDecisionMade}
-          style={{ background: "#dc2626", color: "white" }}
-        >
-          Reject
-        </button>
-      </div>
+        {!isDecisionMade && (
+          <div className="mt-5">
+            <label className="block mb-2 font-medium text-gray-700">
+              Reason for rejection:
+            </label>
 
-      {!isDecisionMade && (
-        <div style={{ marginBottom: 12 }}>
-          <label>
-            Reason for rejection:
-            <br />
             <textarea
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               rows={3}
-              style={{ width: "100%", maxWidth: 500 }}
+              placeholder="Enter reason..."
+              className="w-full max-w-xl border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-red-500 outline-none"
             />
-          </label>
-        </div>
-      )}
+          </div>
+        )}
 
-      {decisionError && (
-        <p style={{ color: "red" }}>{decisionError}</p>
-      )}
+        {decisionError && (
+          <p className="mt-4 text-red-600 font-medium">
+            {decisionError}
+          </p>
+        )}
+      </div>
 
-      <PDFViewer
-        pdfUrl={`http://localhost:5000/uploads/sample.pdf`}
-        fileId={request.fileId}
-        isReadOnly={isDecisionMade}
-      />
+      <div className="bg-white rounded-xl shadow-lg p-6 flex justify-center overflow-auto">
+        {document && (
+  <PDFViewer
+    pdfUrl={`http://localhost:5000/${document.filePath}`}
+    fileId={request.fileId}
+    isReadOnly={isDecisionMade}
+    signerEmail={request.signerEmail}
+    signatureText={signatureText}
+    setSignatureText={setSignatureText}
+  />
+)}
+      </div>
+
     </div>
-  );
+  </div>
+);
 }
 
 export default PublicSignPage;

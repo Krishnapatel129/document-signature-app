@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DocumentCard from "../components/DocumentCard";
+import { Link } from "react-router-dom";
 
 export default function Dashboard() {
   const [documents, setDocuments] = useState([]);
@@ -66,6 +67,12 @@ export default function Dashboard() {
         <option>Signed</option>
         <option>Rejected</option>
       </select>
+        <Link
+    to="/upload"
+    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold"
+  >
+    + Upload New PDF
+  </Link>
     </div>
 
   </div>

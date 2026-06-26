@@ -4,16 +4,23 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { useEffect, useState } from "react";
 
+
 const API_BASE =
   import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-function PDFViewer({ pdfUrl, fileId, isReadOnly }) {
+function PDFViewer({
+  pdfUrl,
+  fileId,
+  isReadOnly,
+  signerEmail,
+})  {
   const [numPages, setNumPages] = useState(null);
 
   const [pageNumber, setPageNumber] = useState(1);
   const [signatures, setSignatures] = useState([]);
   const [error, setError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+const [signatureText, setSignatureText] = useState("");
 
   // Keep only signatures for the currently displayed page
   const pageSignatures = signatures.filter(
@@ -42,19 +49,18 @@ function PDFViewer({ pdfUrl, fileId, isReadOnly }) {
   }, [fileId]);
   const saveSignature = async (x, y) => {
   try {
-    const response = await axios.post(
-      `${API_BASE}/api/signatures`,
-      {
-        fileId,
-        signer: "K. H. Patel",
-        // Keep typed signature value in `signatureText` too.
-        // Since this public page doesn't have an explicit input,
-        // we reuse the same value for now.
-        x,
-        y,
-        pageNumber,
-      }
-    );
+   const response = await axios.post(
+  `${API_BASE}/api/signatures`,
+  {
+    fileId,
+    signer: signatureText.trim() || signerEmail || "Signed",
+    signerEmail,
+    signatureText: signatureText.trim() || signerEmail || "Signed",
+    x,
+    y,
+    pageNumber,
+  }
+);
 
     console.log("Saved:", response.data);
 
@@ -148,10 +154,22 @@ function PDFViewer({ pdfUrl, fileId, isReadOnly }) {
       );
     }
   };
+  
 
   return (
     <div style={{ textAlign: "center" }}>
       <div style={{ marginBottom: 12 }}>
+       <div>
+     <input
+  type="text"
+  value={signatureText}
+  onChange={(e) => setSignatureText(e.target.value)}
+  placeholder="Enter signature text"
+  className="border border-gray-300 rounded-lg px-4 py-2 w-72 mb-3 text-center outline-none focus:ring-2 focus:ring-blue-500"
+/>
+
+      {/* PDF render here */}
+    </div>
         <div
           draggable={!isReadOnly}
           onDragStart={isReadOnly ? undefined : handleDragStart}
@@ -170,7 +188,7 @@ function PDFViewer({ pdfUrl, fileId, isReadOnly }) {
             userSelect: "none",
           }}
         >
-          Drag signature field onto PDF
+          Drag signature field into PDF
         </div>
       </div>
 
@@ -206,24 +224,31 @@ function PDFViewer({ pdfUrl, fileId, isReadOnly }) {
         </Document>
 
         {signatures
-          .filter(
-            (sig) =>
-              sig.coordinates &&
-              sig.coordinates.x !== undefined &&
-              sig.coordinates.y !== undefined
-          )
-          .map((sig, idx) => (
-            <div
-              key={sig._id || idx}
-              style={{
-                position: "absolute",
-                left: `${sig.coordinates.x * 100}%`,
-                top: `${sig.coordinates.y * 100}%`,
-              }}
-            >
-              {sig.signer}
-            </div>
-          ))}
+  .filter(
+    (sig) =>
+      sig.x !== undefined &&
+      sig.y !== undefined
+  )
+  .map((sig, idx) => (
+    <div
+      key={sig._id || idx}
+      style={{
+        position: "absolute",
+        left: `${sig.x * 100}%`,
+        top: `${sig.y * 100}%`,
+        transform: "translate(-50%, -50%)",
+        background: "#fde68a",
+        border: "2px solid #f59e0b",
+        padding: "6px 14px",
+        borderRadius: "6px",
+        fontWeight: "bold",
+        color: "#111827",
+        zIndex: 10,
+      }}
+    >
+      {sig.signatureText || sig.signer || "Signed"}
+    </div>
+  ))}
       </div>
 
       {numPages && (

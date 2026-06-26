@@ -1,9 +1,11 @@
+import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 
 import StatusFilter from "../components/StatusFilter";
 import DocumentCard from "../components/DocumentCard";
 import EmptyState from "../components/EmptyState";
+
 
 const API_BASE = "http://localhost:5000";
 
@@ -38,7 +40,17 @@ export default function Dashboard() {
       (doc) => doc.status?.toLowerCase() === filter.toLowerCase()
     );
   }, [documents, filter]);
+const deleteDocument = async (id) => {
+  if (!window.confirm("Are you sure you want to delete this PDF?")) return;
 
+  try {
+    await axios.delete(`${API_BASE}/api/dashboard/documents/${id}`);
+    fetchDocuments();
+  } catch (err) {
+    console.error("Delete Error:", err);
+    alert("Failed to delete PDF");
+  }
+};
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -49,16 +61,21 @@ export default function Dashboard() {
         </div>
 
         {filteredDocuments.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredDocuments.map((file) => (
-              <DocumentCard key={file._id} document={file} />
-            ))}
-          </div>
-        )}
+  <EmptyState />
+) : (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {filteredDocuments.map((file) => (
+      <DocumentCard
+        key={file._id}
+        document={file}
+        onDelete={deleteDocument}
+      />
+    ))}
+  </div>
+)}
       </div>
     </div>
+    
   );
 }
 
