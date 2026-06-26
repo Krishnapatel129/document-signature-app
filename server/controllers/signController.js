@@ -18,33 +18,36 @@ export const createSignature = async (req, res) => {
     const {
       fileId,
       signer,
+      signerEmail,
+      signatureText,
       x,
       y,
       pageNumber,
     } = req.body;
 
+    await Signature.deleteMany({ documentId: fileId });
+
     const signature = await Signature.create({
-      fileId,
-      signer,
-      coordinates: {
-        x,
-        y,
-      },
-      pageNumber,
-      status: "Pending",
-    });
+  documentId: fileId,
+  signer,
+  signerEmail,
+  signatureText,
+  x,
+  y,
+  pageNumber,
+  status: "Pending",
+});
 
     return res.status(201).json({
       message: "Signature saved",
       signature,
     });
-
   } catch (error) {
-    console.error("CREATE SIGNATURE ERROR:");
-    console.error(error);
+    console.error("CREATE SIGNATURE ERROR:", error);
 
     return res.status(500).json({
       message: error.message,
+      
     });
   }
 };
@@ -125,12 +128,13 @@ export const getSignaturesByFile = async (req, res) => {
   try {
     const { fileId } = req.params;
 
-    const signatures = await Signature.find({ fileId });
+    const signatures = await Signature.find({
+      documentId: fileId,
+    });
 
     return res.status(200).json({
       signatures,
     });
-
   } catch (error) {
     console.error("Get Signatures Error:", error);
 
@@ -162,8 +166,7 @@ export const generateSignedPDF = async (req, res) => {
       });
     }
 
-    const signatures = await Signature.find({ fileId });
-
+   const signatures = await Signature.find({ documentId: fileId });
     console.log("Signatures:", signatures);
 
     if (signatures.length === 0) {
@@ -210,14 +213,7 @@ signatures.forEach((sig) => {
   }
 
   // Skip old/invalid signatures
-  if (
-    !sig.coordinates ||
-    sig.coordinates.x === undefined ||
-    sig.coordinates.y === undefined
-  ) {
-    console.log("Skipping invalid signature:", sig._id, sig);
-    return;
-  }
+  sig.x === undefined || sig.y === undefined
 
   const pageIndex = (sig.pageNumber || 1) - 1;
   const page = pdfDoc.getPages()[pageIndex];
@@ -230,8 +226,8 @@ signatures.forEach((sig) => {
   const { width: pageWidth, height: pageHeight } =
     pageDimensions(page);
 
-  const x = sig.coordinates.x * pageWidth;
-  const y = pageHeight - sig.coordinates.y * pageHeight;
+ const x = sig.x * pageWidth;
+const y = pageHeight - sig.y * pageHeight;
 
   console.log("Drawing signature", {
     sigId: sig._id?.toString?.(),
@@ -287,6 +283,10 @@ signatures.forEach((sig) => {
       signedPath,
       signedPdfBytes
     );
+    document.status = "Signed";
+document.signedAt = new Date();
+document.signedFilePath = `/uploads/signed/${signedFileName}`;
+await document.save();
 
     console.log("Signed PDF saved:", signedPath);
 

@@ -16,6 +16,7 @@ import signatureRequestRoutes
 from "./routes/signatureRequestRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import auditRoutes from "./routes/auditRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
 
 // DNS setup
@@ -41,18 +42,11 @@ const allowedOrigins = [
 
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // allow REST tools like Postman (no origin)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    console.log("[CORS BLOCKED]:", origin);
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
+  origin: [
+    "http://localhost:5173",
+    process.env.FRONTEND_URL
+  ],
+  credentials: true
 }));
 
 app.use(express.json());

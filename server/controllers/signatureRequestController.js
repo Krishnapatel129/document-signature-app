@@ -94,9 +94,9 @@ const applyDecisionToSignatures = async ({
   }
 
   const result = await Signature.updateMany(
-    { fileId },
-    { $set: update }
-  );
+  { documentId: fileId },
+  { $set: update }
+);
 
   return result;
 };
