@@ -16,7 +16,7 @@ import signatureRequestRoutes
 from "./routes/signatureRequestRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import auditRoutes from "./routes/auditRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
+
 
 
 // DNS setup
