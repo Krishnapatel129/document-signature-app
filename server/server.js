@@ -7,7 +7,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import connectDB from "./config/db.js";
-import authroutes from "./routes/authroutes.js";
+import authroutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 import signatureRoutes from "./routes/signatureRoutes.js";
@@ -59,7 +59,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/signed", express.static(path.join(__dirname, "signed")));
 
 // ✅ Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authroutes);
 app.use("/api/users", userRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/signatures", signatureRoutes);
