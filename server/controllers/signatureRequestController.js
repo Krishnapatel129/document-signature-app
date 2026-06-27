@@ -15,7 +15,7 @@ export const createSignatureRequest = async (req, res) => {
       token,
     });
 
-    const link = `${process.env.CLIENT_URL}/sign/${token}`;
+    const link = `${process.env.FRONTEND_URL}/sign/${token}`;
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
