@@ -58,12 +58,7 @@ function DocumentList() {
           >
             Request Signature
           </button>
-          <button
-  onClick={() => onDelete(document._id)}
-  className="bg-red-600 text-white px-4 py-2 rounded-lg mt-3"
->
-  Delete
-</button>
+         
         </div>
       ))}
     </div>
