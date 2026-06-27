@@ -14,6 +14,13 @@ function PublicSignPage() {
   const [decisionError, setDecisionError] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
   const [signatureText, setSignatureText] = useState("");
+  const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
+const getFileUrl = (filePath) => {
+  if (!filePath) return "";
+  if (filePath.startsWith("http")) return filePath;
+  return `${API_BASE}/${filePath.replace(/^\/+/, "")}`;
+};
 
   useEffect(() => {
     fetchRequest();
