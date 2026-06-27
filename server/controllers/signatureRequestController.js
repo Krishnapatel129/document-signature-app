@@ -17,22 +17,30 @@ export const createSignatureRequest = async (req, res) => {
 
     const link = `${process.env.FRONTEND_URL}/sign/${token}`;
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: signerEmail,
-      subject: "Document Signature Request",
-      html: `
-        <h2>Please Sign Document</h2>
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: signerEmail,
+        subject: "Document Signature Request",
+        html: `
+          <h2>Please Sign Document</h2>
+          <p>Click the link below to sign:</p>
+          <a href="${link}">${link}</a>
+        `,
+      });
+    } catch (emailError) {
+      console.error("EMAIL SEND FAILED:", emailError.message);
 
-        <p>Click the link below to sign:</p>
+      return res.status(201).json({
+        success: true,
+        emailSent: false,
+        message: "Signature request created, but email failed",
+        error: emailError.message,
+        link,
+        request,
+      });
+    }
 
-        <a href="${link}">
-          ${link}
-        </a>
-      `,
-    });
-
-    // Audit Log
     await logAudit({
       fileId,
       action: "Signature Request Sent",
@@ -42,7 +50,9 @@ export const createSignatureRequest = async (req, res) => {
 
     res.status(201).json({
       success: true,
+      emailSent: true,
       message: "Email sent",
+      link,
       request,
     });
   } catch (error) {

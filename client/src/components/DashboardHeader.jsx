@@ -14,7 +14,7 @@ export default function Dashboard() {
   const fetchDocuments = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}api/files`
+        `${import.meta.env.VITE_API_BASE_URL}/api/files`
       );
 
       // Normalize API response: it may return either an array or an object like { documents: [...] }
