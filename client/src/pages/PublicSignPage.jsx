@@ -175,13 +175,13 @@ const getFileUrl = (filePath) => {
       <div className="bg-white rounded-xl shadow-lg p-6 flex justify-center overflow-auto">
         {document && (
   <PDFViewer
-    pdfUrl={`${import.meta.env.VITE_API_BASE_URL}${document.filePath}`}
-    fileId={request.fileId}
-    isReadOnly={isDecisionMade}
-    signerEmail={request.signerEmail}
-    signatureText={signatureText}
-    setSignatureText={setSignatureText}
-  />
+  pdfUrl={getFileUrl(document.filePath)}
+  fileId={request.fileId}
+  isReadOnly={isDecisionMade}
+  signerEmail={request.signerEmail}
+  signatureText={signatureText}
+  setSignatureText={setSignatureText}
+/>
 )}
       </div>
 

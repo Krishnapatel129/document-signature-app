@@ -96,19 +96,19 @@ export default function Viewer() {
 
     if (!signerEmail) return;
 
-    await axios.post(
+    const res = await axios.post(
       `${import.meta.env.VITE_API_BASE_URL}/api/signature-requests`,
       {
         fileId: document._id,
-        signerEmail,
+        signerEmail: signerEmail,
       }
     );
 
+    console.log("Signature request response:", res.data);
     alert("Signature request email sent!");
   } catch (error) {
-    console.error(error);
-    alert("Failed to send email");
-    console.log("FILE ID RECEIVED:", fileId);
+    console.error("EMAIL ERROR:", error.response?.data || error.message);
+    alert(error.response?.data?.message || "Failed to send email");
   }
 };
 
