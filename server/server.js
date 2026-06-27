@@ -59,7 +59,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/signed", express.static(path.join(__dirname, "signed")));
 
 // ✅ Routes
-app.use("/api/auth", authroutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/signatures", signatureRoutes);
