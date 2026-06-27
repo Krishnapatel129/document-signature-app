@@ -20,7 +20,7 @@ export default function Viewer() {
   const fetchDocument = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}api/documents/${id}`
+        `${import.meta.env.VITE_API_BASE_URL}/api/documents/${id}`
       );
       setDocument(res.data);
     } catch (err) {
@@ -42,7 +42,7 @@ export default function Viewer() {
 
  const handleSign = async () => {
   try {
-    await axios.post(`${import.meta.env.VITE_API_BASE_URL}api/signatures`, {
+    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/signatures`, {
       fileId: id,
       signer: "K.H.Patel",
       signerEmail: "patelkrishna21092003@gmail.com",
@@ -53,7 +53,7 @@ export default function Viewer() {
     });
 
     await axios.post(
-      `${import.meta.env.VITE_API_BASE_URL}api/signatures/finalize/${id}`
+      `${import.meta.env.VITE_API_BASE_URL}/api/signatures/finalize/${id}`
     );
 
     alert("Document signed successfully");
@@ -72,7 +72,7 @@ export default function Viewer() {
 
     try {
       await axios.put(
-        `${import.meta.env.VITE_API_BASE_URL}api/documents/${id}/reject`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/documents/${id}/reject`,
         { reason }
       );
 
@@ -97,7 +97,7 @@ export default function Viewer() {
     if (!signerEmail) return;
 
     await axios.post(
-      `${import.meta.env.VITE_API_BASE_URL}api/signature-requests`,
+      `${import.meta.env.VITE_API_BASE_URL}/api/signature-requests`,
       {
         fileId: document._id,
         signerEmail,
