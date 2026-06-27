@@ -19,7 +19,7 @@ export default function Upload() {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/files/upload",
+        `${import.meta.env.VITE_API_BASE_URL}api/files/upload`,
         formData,
         {
           headers: {

@@ -2,8 +2,7 @@ import axios from "axios";
 import { useMemo, useState } from "react";
 import { Document, Page } from "react-pdf";
 
-const API_BASE =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 /**
  * Preview/placement UI.

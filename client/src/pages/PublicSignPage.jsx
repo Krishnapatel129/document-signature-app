@@ -22,13 +22,13 @@ function PublicSignPage() {
   const fetchRequest = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/signature-requests/${token}`
+        `${import.meta.env.VITE_API_BASE_URL}api/signature-requests/${token}`
       );
 
       setRequest(res.data);
 
       const docRes = await axios.get(
-        `http://localhost:5000/api/documents/${res.data.fileId}`
+        `${import.meta.env.VITE_API_BASE_URL}api/documents/${res.data.fileId}`
       );
 
       setDocument(docRes.data);
@@ -46,11 +46,11 @@ function PublicSignPage() {
 
   try {
     await axios.post(
-      `http://localhost:5000/api/signatures/finalize/${request.fileId}`
+      `${import.meta.env.VITE_API_BASE_URL}api/signatures/finalize/${request.fileId}`
     );
 
     const res = await axios.put(
-      `http://localhost:5000/api/signature-requests/${token}/accept`
+      `${import.meta.env.VITE_API_BASE_URL}api/signature-requests/${token}/accept`
     );
 
     setRequest(res.data.request);
@@ -70,7 +70,7 @@ function PublicSignPage() {
       const reasonToSend = rejectReason.trim();
 
       const res = await axios.put(
-        `http://localhost:5000/api/signature-requests/${token}/reject`,
+        `${import.meta.env.VITE_API_BASE_URL}api/signature-requests/${token}/reject`,
         { reason: reasonToSend }
       );
 
@@ -168,7 +168,7 @@ function PublicSignPage() {
       <div className="bg-white rounded-xl shadow-lg p-6 flex justify-center overflow-auto">
         {document && (
   <PDFViewer
-    pdfUrl={`http://localhost:5000/${document.filePath}`}
+    pdfUrl={`${import.meta.env.VITE_API_BASE_URL}${document.filePath}`}
     fileId={request.fileId}
     isReadOnly={isDecisionMade}
     signerEmail={request.signerEmail}

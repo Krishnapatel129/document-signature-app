@@ -6,8 +6,7 @@ import StatusFilter from "../components/StatusFilter";
 import DocumentCard from "../components/DocumentCard";
 import EmptyState from "../components/EmptyState";
 
-
-const API_BASE = "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 export default function Dashboard() {
   const [documents, setDocuments] = useState([]);
