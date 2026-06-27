@@ -11,7 +11,7 @@ function DocumentList() {
       if (!signerEmail) return;
 
       await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}api/signature-requests`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/signature-requests`,
         {
           fileId,
           signerEmail,
