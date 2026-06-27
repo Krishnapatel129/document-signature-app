@@ -44,7 +44,7 @@ const allowedOrigins = [
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    process.env.FRONTEND_URL
+    "https://document-signature-app-theta-three.vercel.app"
   ],
   credentials: true
 }));
