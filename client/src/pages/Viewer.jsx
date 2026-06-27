@@ -181,7 +181,7 @@ export default function Viewer() {
 
         <div id="pdf-area" className="relative w-full h-[800px] border">
          <iframe
-  src={`${import.meta.env.VITE_API_BASE_URL}${document.signedFilePath || "/" + document.filePath}`}
+  src={`${import.meta.env.VITE_API_BASE_URL}/${(document.signedFilePath || document.filePath).replace(/^\/+/, "")}`}
   title="PDF Viewer"
   className="w-full h-full"
 />
