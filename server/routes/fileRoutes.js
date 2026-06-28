@@ -27,7 +27,7 @@ router.post("/upload", upload.single("pdf"), async (req, res) => {
   try {
     const document = await Document.create({
       fileName: req.file.originalname,
-      filePath: `uploads/${req.file.filename}`,
+      filePath: `/uploads/${req.file.filename}`,
       fileSize: req.file.size,
       status: "Pending",
     });
@@ -42,6 +42,15 @@ router.post("/upload", upload.single("pdf"), async (req, res) => {
       error: error.message,
     });
   }
+});
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype !== "application/pdf") {
+      return cb(new Error("Only PDF files are allowed"));
+    }
+    cb(null, true);
+  },
 });
 // GET /api/files
 router.get("/", (req, res) => {
