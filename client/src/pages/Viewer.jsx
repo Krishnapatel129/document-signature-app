@@ -105,10 +105,19 @@ export default function Viewer() {
     );
 
     console.log("Signature request response:", res.data);
-    alert("Signature request email sent!");
+
+    if (res.data.emailSent === true) {
+      alert("Signature request email sent!");
+    } else {
+      await navigator.clipboard.writeText(res.data.link);
+
+      alert(
+        `Email not sent, but signature request created.\n\nLink copied:\n${res.data.link}`
+      );
+    }
   } catch (error) {
     console.error("EMAIL ERROR:", error.response?.data || error.message);
-    alert(error.response?.data?.message || "Failed to send email");
+    alert(error.response?.data?.message || "Failed to send signature request");
   }
 };
 
