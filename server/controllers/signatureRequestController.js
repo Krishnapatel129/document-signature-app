@@ -17,53 +17,306 @@ export const createSignatureRequest = async (req, res) => {
 
     const link = `${process.env.FRONTEND_URL}/sign/${token}`;
 
-    try {
-  await Promise.race([
-    transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: signerEmail,
-      subject: "Document Signature Request",
-      html: `
-        <h2>Please Sign Document</h2>
-        <p>Click the link below to sign:</p>
-        <a href="${link}">${link}</a>
-      `,
-    }),
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Email sending timeout")), 8000)
-    ),
-  ]);
-} catch (emailError) {
-  console.error("EMAIL SEND FAILED:", emailError.message);
-
-  return res.status(201).json({
-    success: true,
-    emailSent: false,
-    message: "Signature request created, but email failed",
-    error: emailError.message,
-    link,
-    request,
-  });
-}
-
-    await logAudit({
-      fileId,
-      action: "Signature Request Sent",
-      actor: signerEmail,
-      ip: req.ip,
-    });
-
+    // send response immediately
     res.status(201).json({
       success: true,
-      emailSent: true,
-      message: "Email sent",
+      emailSent: "processing",
+      message: "Signature request created",
       link,
       request,
     });
+
+    // email runs after response
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: signerEmail,
+        subject: "Document Signature Request",
+        html: `
+          <h2>Please Sign Document</h2>
+          <p>Click the link below to sign:</p>
+          <a href="${link}">${link}</a>
+        `,
+      });
+
+      await logAudit({
+        fileId,
+        action: "Signature Request Sent",
+        actor: signerEmail,
+        ip: req.ip,
+      });
+    } catch (emailError) {
+      console.error("EMAIL SEND FAILED:", emailError.message);
+    }
   } catch (error) {
     console.error("SIGNATURE REQUEST ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};export const createSignatureRequest = async (req, res) => {
+  try {
+    const { fileId, signerEmail } = req.body;
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    const request = await SignatureRequest.create({
+      fileId,
+      signerEmail,
+      token,
+    });
+
+    const link = `${process.env.FRONTEND_URL}/sign/${token}`;
+
+    // send response immediately
+    res.status(201).json({
+      success: true,
+      emailSent: "processing",
+      message: "Signature request created",
+      link,
+      request,
+    });
+
+    // email runs after response
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: signerEmail,
+        subject: "Document Signature Request",
+        html: `
+          <h2>Please Sign Document</h2>
+          <p>Click the link below to sign:</p>
+          <a href="${link}">${link}</a>
+        `,
+      });
+
+      await logAudit({
+        fileId,
+        action: "Signature Request Sent",
+        actor: signerEmail,
+        ip: req.ip,
+      });
+    } catch (emailError) {
+      console.error("EMAIL SEND FAILED:", emailError.message);
+    }
+  } catch (error) {
+    console.error("SIGNATURE REQUEST ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};export const createSignatureRequest = async (req, res) => {
+  try {
+    const { fileId, signerEmail } = req.body;
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    const request = await SignatureRequest.create({
+      fileId,
+      signerEmail,
+      token,
+    });
+
+    const link = `${process.env.FRONTEND_URL}/sign/${token}`;
+
+    // send response immediately
+    res.status(201).json({
+      success: true,
+      emailSent: "processing",
+      message: "Signature request created",
+      link,
+      request,
+    });
+
+    // email runs after response
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: signerEmail,
+        subject: "Document Signature Request",
+        html: `
+          <h2>Please Sign Document</h2>
+          <p>Click the link below to sign:</p>
+          <a href="${link}">${link}</a>
+        `,
+      });
+
+      await logAudit({
+        fileId,
+        action: "Signature Request Sent",
+        actor: signerEmail,
+        ip: req.ip,
+      });
+    } catch (emailError) {
+      console.error("EMAIL SEND FAILED:", emailError.message);
+    }
+  } catch (error) {
+    console.error("SIGNATURE REQUEST ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};export const createSignatureRequest = async (req, res) => {
+  try {
+    const { fileId, signerEmail } = req.body;
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    const request = await SignatureRequest.create({
+      fileId,
+      signerEmail,
+      token,
+    });
+
+    const link = `${process.env.FRONTEND_URL}/sign/${token}`;
+
+    // send response immediately
+    res.status(201).json({
+      success: true,
+      emailSent: "processing",
+      message: "Signature request created",
+      link,
+      request,
+    });
+
+    // email runs after response
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: signerEmail,
+        subject: "Document Signature Request",
+        html: `
+          <h2>Please Sign Document</h2>
+          <p>Click the link below to sign:</p>
+          <a href="${link}">${link}</a>
+        `,
+      });
+
+      await logAudit({
+        fileId,
+        action: "Signature Request Sent",
+        actor: signerEmail,
+        ip: req.ip,
+      });
+    } catch (emailError) {
+      console.error("EMAIL SEND FAILED:", emailError.message);
+    }
+  } catch (error) {
+    console.error("SIGNATURE REQUEST ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};export const createSignatureRequest = async (req, res) => {
+  try {
+    const { fileId, signerEmail } = req.body;
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    const request = await SignatureRequest.create({
+      fileId,
+      signerEmail,
+      token,
+    });
+
+    const link = `${process.env.FRONTEND_URL}/sign/${token}`;
+
+    // send response immediately
+    res.status(201).json({
+      success: true,
+      emailSent: "processing",
+      message: "Signature request created",
+      link,
+      request,
+    });
+
+    // email runs after response
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: signerEmail,
+        subject: "Document Signature Request",
+        html: `
+          <h2>Please Sign Document</h2>
+          <p>Click the link below to sign:</p>
+          <a href="${link}">${link}</a>
+        `,
+      });
+
+      await logAudit({
+        fileId,
+        action: "Signature Request Sent",
+        actor: signerEmail,
+        ip: req.ip,
+      });
+    } catch (emailError) {
+      console.error("EMAIL SEND FAILED:", emailError.message);
+    }
+  } catch (error) {
+    console.error("SIGNATURE REQUEST ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};export const createSignatureRequest = async (req, res) => {
+  try {
+    const { fileId, signerEmail } = req.body;
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    const request = await SignatureRequest.create({
+      fileId,
+      signerEmail,
+      token,
+    });
+
+    const link = `${process.env.FRONTEND_URL}/sign/${token}`;
+
+    // send response immediately
+    res.status(201).json({
+      success: true,
+      emailSent: "processing",
+      message: "Signature request created",
+      link,
+      request,
+    });
+
+    // email runs after response
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: signerEmail,
+        subject: "Document Signature Request",
+        html: `
+          <h2>Please Sign Document</h2>
+          <p>Click the link below to sign:</p>
+          <a href="${link}">${link}</a>
+        `,
+      });
+
+      await logAudit({
+        fileId,
+        action: "Signature Request Sent",
+        actor: signerEmail,
+        ip: req.ip,
+      });
+    } catch (emailError) {
+      console.error("EMAIL SEND FAILED:", emailError.message);
+    }
+  } catch (error) {
+    console.error("SIGNATURE REQUEST ERROR:", error);
+
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
