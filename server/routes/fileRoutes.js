@@ -43,15 +43,7 @@ router.post("/upload", upload.single("pdf"), async (req, res) => {
     });
   }
 });
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype !== "application/pdf") {
-      return cb(new Error("Only PDF files are allowed"));
-    }
-    cb(null, true);
-  },
-});
+
 // GET /api/files
 router.get("/", (req, res) => {
   fs.readdir(uploadDir, (err, files) => {
