@@ -26,16 +26,47 @@ export const createSignatureRequest = async (req, res) => {
     });
 
     transporter
-      .sendMail({
-        from: process.env.EMAIL_USER,
-        to: signerEmail,
-        subject: "Document Signature Request",
-        html: `
-          <h2>Please Sign Document</h2>
-          <p>Click the link below to sign:</p>
+  .sendMail({
+    from: process.env.EMAIL_USER,
+    to: signerEmail,
+    subject: "Document Signature Request",
+    text: `You have received a document to sign.
+
+Open this link:
+${link}
+`,
+    html: `
+      <div style="font-family: Arial, sans-serif; padding:20px">
+        <h2>Document Signature Request</h2>
+
+        <p>You have been requested to sign a document.</p>
+
+        <p>Click the button below to open the document:</p>
+
+        <a
+          href="${link}"
+          style="
+            background:#2563eb;
+            color:white;
+            padding:12px 20px;
+            text-decoration:none;
+            border-radius:6px;
+            display:inline-block;
+          "
+        >
+          Open Document
+        </a>
+
+        <br><br>
+
+        <p>If the button doesn't work, copy and paste this link:</p>
+
+        <p>
           <a href="${link}">${link}</a>
-        `,
-      })
+        </p>
+      </div>
+    `,
+  })
       .then(async () => {
         console.log("EMAIL SENT SUCCESSFULLY");
 
